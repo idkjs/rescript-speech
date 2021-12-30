@@ -1,0 +1,78 @@
+Dear Mr. Smith,
+My name is Viacheslav Tuev.
+I am the reprepresentive IT conference committee which will be held on 20th January in Moscow.
+On behalf of the committee I have a greate pleasure in inviting you to be one of our
+key speakers at the conference.
+Our conference is one of the biggest conferences in Moscow. There are 20 speakers on our "wish list"
+who have already accepted the invitation. You can find the list in the attachement.
+We would be very glad if you would like to get more information about the conference.
+We look forward to hearing form you,
+Viacheslav Tuev.
+
+---------------------------------------------------------------------
+
+
+Hi Andrew!
+I am writing this email to you to say that I am sorry I am not able to have lunch with you on Wednesday.
+It turns out I am very busy this day.
+I am ok on Friday. Does Friday work for you?
+I am looking forward to seeing you on Friday.
+
+Sincirely yours,
+Viacheslav
+
+---------------------------------------------------------------------
+EPAM benefits!
+There are many benefints for emploies in the EPAM company.
+We have a comfortable office with a nice kitchen, where we could use a coffee machine,
+a microwave owen and other facilities.
+In the office we have some recreation areas and sport facilities.
+It is very important for a software developer to do some sport execises to keep heathy.
+In addition to that we have a lot of training courses for improving our skills.
+I like them very much.
+Currently I am taking English training and a Node JS development course.
+We also have medical insurance and sometimes doctors come to our office to help us to understand the condition of our heath.
+The one more interesting opportunity that  employees have in EPAM is an opportunity to work on different projects.
+By the way I have been working for EPAM for two years and I've portisipated in five different interesting projects with different teams and styles.
+
+There are many other benefits in EPAM like reolacation, flexible hours, meetups, conferences.
+So it's a very good company. I like it very much.
+
+---------------------------------------------------------------------
+
+My last project.
+
+I am currently working on Sberbank black list project.
+It is very important project because the bank any other banks must stop any of the finance transactions which made by criminal people.
+The are five EPAM developers and four Sberbank employees in our team.
+We have worked for four months already and we are going to to work for two months more.
+Our task is to migrate the Sberbank stop-list database to the new framework.
+In additional to that we also are to develop a new application which will allow to add, edit and delete records in this database.
+It is unbelievable that we have had difficulties with computers during our work in the project.
+We have been sharing our computer between two or three developers.
+But now this problem has been fixed. We have taken the equipment we needed.
+One more thing I have to mention is that the office we are working in is far from tube stations.
+It takes a lot of time to commute between my home and the office.
+Nevertheless we will do our best to get the work done.
+Our team consists of motivated employees and we have very qualified and active team leader.
+Things are running smoothly at the moment. We are ahead of schedule.
+This is not bad project, but I would prefer to not to work in Sberbank in my next project.
+I would change it to another EPAM project to get to know something new and to meet new people.
+
+---------------------------------------------------------------------
+
+New technologies that changes the world!
+Internet.
+Internet was invented by scientists who wanted to use it to share their information and theories between universities.
+Those scientiest couldn't predict of what has become of thier child now.
+Now we can't imagine our life without internet. It is everywhere.
+Basically most of our new devices now are connected to it.
+Phones, computers, TV, refregirators, kettles are connected to it, as well as our house light system.
+First of all, internet is a global communication net with big servers and an enormous number of small computers.
+It helps us to get information we needed.
+It makes communications to be so easy made that it starts changing our life with very fast speed.
+And the speed is growing fast.
+This will defenitely end in singularity point of mankind, where human nature be transformed to something new, we can hardly imagine what.
+
+----------------------------------------------------------------------
+

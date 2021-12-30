@@ -1,0 +1,1275 @@
+
+
+У list  spread можно использовать только в конце,
+а у record - только в начале!!!
+
+
+
+ 2016 - год   Bloomberg L.P. — один из двух ведущих поставщиков финансовой информации
+ для профессиональных участников финансовых рынков - создал (и сделал open source)
+ BuckleScript - компилятор Ocaml -> Js   (Пряжка, скоба, застежка)
+
+ (На сайте http://ocaml.org первое что мы видим -
+ OCaml is an industrial strength programming language supporting functional,
+ imperative and object-oriented styles
+
+ а js - это просто ассеблер, со всеми признаками ассеблера
+ Это видно из  https://wiki.haskell.org/The_JavaScript_Problem - An advanced, purely functional programming language
+ Types become not only a form of guarantee, but a language for expressing the construction of programs.
+ где описаны недостатки js
+
+ Ocaml  отметился так же тем, что на нем были написаны первые версии реакта. Это сделал Джордан и ...
+Ссылка на подкаст про Ocaml
+
+Ocaml - похож на хаскель, но более неказистый, чем хаскель
+Но не ленивый. Время ленивости еще не пришло.
+Ocaml не использует indention.
+
+
+Джордан создал ReasonMl, чтобы у js-разработчиков не было когнитивного диссонанса.
+
+
+ReasonML - это старый добрый OCaml, но с похожим на JS синтаксисом.
+Примеры кода Ocaml и js  (дальше - будем рассмривать подробно)
+
+Ocaml - неказистый хаскель.
+
+let a = [1, 2, 3, 4, 5, 6, 7, 8, 9];   -- ReasonML
+let a = [1; 2; 3; 4; 5; 6; 7; 8; 9]   -- Ocaml (еще встречаются двойные семиколоны, не разобрался)
+
+a = [1, 2, 3, 4, 5, 6, 7, 8, 9]   -- Haskell
+
+
+очень хороший пример на try - https://reasonml.github.io/en/try  my-notes.txttype tree = Leaf | Node(int, tree, tree);
+
+type tree = Leaf | Node(int, tree, tree);
+
+let myTree =
+  Node(
+    1,                                                                          1
+    Node(2, Node(4, Leaf, Leaf), Node(6, Leaf, Leaf)),                    2           3
+    Node(3, Node(5, Leaf, Leaf), Node(7, Leaf, Leaf))                   4   6       5   7
+  );
+
+let rec sum = (item) => {
+  switch (item) {
+  | Leaf => 0
+  | Node(value, left, right) => value + sum(left) + sum(right);
+  }
+};
+
+
+
+Js.log(sum(myTree));
+
+2. 100% иммутабельность + статическая типизация + алгебраические типы данных
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+Checklist
+https://gist.github.com/askd/e7f1e313dfd751331bc54a8cea15b1b3
+
+
+1. Build a local version of OCaml compiler touch: s.h:
+Permission denied - Пришлось делать даунгрейд версии npm 4.0.0. - иначе не проходила установка
+
+Главное - vscode-reasonml -  расширение для vscode
+
+2. Два варианта создания стартового проекта:
+
+	--- BuckleScript's bsb build system has an init command that generates a project template.
+  The react theme offers a lightweight solution optimized for low learning overhead and ease of integration into an existing project.
+It compiles to straightforward JS files, so you can open index.html directly from the file system. No server needed.
+
+
+	--- Reason Scripts (Aka Create-React-App) As with create-react-app, reason-scripts comes with a server and hot-reloading built in.
+
+
+3. Need to switch to nam 4.0.0 again - to install ocamlmerlin
+
+3. Увидел много   <div> (React.string(...) </div>  - многословность React.string(
+
+5. Размер js бандла reason React - 126 кБ. (  cra - 118 кБ)
+
+4. Странный способ комментировать - не удобный
+   Странный let в отличии от  "let in" в OCaml
+   Кавычки - двойные (странно)?  - конкатенация строк  ++ - тоже многословно.
+   Equal - deep Equal ?
+   Integers - 32  Careful when you bind to JavaScript numbers! Long ones might be truncated. Bind JS number as float instead.
+
+  Отличаются символы арифметических операций для целых  и плавающих чисел. "Why the heck can't I just use an overloaded + for both int and float?"
+
+5.  Mutable Update.
+Record fields can optionally be mutable.
+This allows you to update those fields in-place with the = operator.
+
+
+6. Lists vs Arrays - Array
+	let myList = [1, 2, 3];
+	( in js it  [1,[2,[3]]]  - если очень много маленьких элементов в списке, то будет большой оверхед, в этом случае нужно испльзовать чистый массив  )
+
+Массивы и списки могут содержать елементы только одинакового типа !!!
+
+	Arrays are like lists, except they are:
+		mutable
+		fast at random access & updates
+		fix-sized on native (flexibly sized on JavaScript)
+		You'd surround them with [| and |].
+
+		let myArray = [|"hello", "world", "how are you"|];
+
+		--  Списки - очень удобная вещь для
+		let a = [1,2,3];
+		let b = [0, ...a];
+
+		Will memory for the list a be actually allocated, or will doSomething simply reuse the list b?
+
+		In the worst case, both a and b will exist in memory in their entirety.
+		Note that even then, the contents of the two lists will only exist once,
+		shared between both lists, so we're only talking about the "spine" of the lists existing twice.
+
+		In the best case, depending on how b is defined and what doSomething does,
+		the compiler might do some hoopy magic
+		to turn the whole thing into a tight constant-space loop
+		that generates the contents of the list as it processes them,
+		possibly involving no memory allocation at all. Maybe.
+
+		But even in the very worst case, you're duplicating the spine of the lists.
+		You'll never duplicate the actual elements in the list.
+
+
+7.  Функции - как в стрелочные функции  в Js.
+	- есть возможность именнованных аргументов.
+	In OCaml/Reason, you can attach labels to an argument:
+	let addCoordinates = (~x, ~y) => {
+  	/* use x and y here */
+	};
+
+  - rec - для рекурсивных функций
+
+	- анонимные функции
+	   /* anonymous function. Listed for completeness only */
+				(x) => (y) => 1;
+				/* sugar for the above */
+				(x, y) => 1;
+				/* assign to a name */
+				let add = (x, y) => 1;
+
+				With Type Annotation:   let add = (x: int, y: int): int => 1;
+
+
+
+Standalone Type Signature
+
+And In Interface Files
+
+8. let rec qsort = a =>
+  switch (a) {
+  | [] => []
+  | [x, ...y] => {
+    let p1 = qsort(List.filter(e => e > x, y));
+    let p2 = qsort(List.filter(e => e <= x, y));
+    p1 @ [x, ...p2]
+    }
+  };
+
+let c = qsort([5,10,1,3,6,8,2]);
+Js.log(c);
+
+List.filter( - не удобно
+@ - не удобно
+
+В общем - на половину Ocaml, на половину JavaScript
+больше в сторону Ocaml
+
+Может лучще полностью прогрммировать на Ocaml ?
+
+8.1 https://wiki.haskell.org/OCaml
+OCaml's let is non-recursive by default,
+but has the form let rec for defining recursive functions.
+OCaml is impure: although it makes heavy use of immutable data,
+it also has mutable references and arrays available,
+and IO is performed by ordinary functions.
+
+
+9.  Если компилируется, то значит работает.  Это правда.
+    Програмирование в хороших языках превратилось в борьбу с компилятором
+    А в плохих - в борьбу с рантаймом
+    При рефакторинге - пусть лучше компилятор сообщит мне об ошибке и покажет, где она,
+    чем тесты (если они есть) станут красными и предется разбираться, почему они покраснели.
+    Или еще хуже - ждать проблем в рантайме через пару месяцев, когда уже все забыл
+
+10. ReasonML records -  это массивы JS.
+Массивы - в 4 раза быстрее чем объекты (мои измерения a-new-app)
+Значит - рекогдс быстрее чем объекты.  Стейт - это в основном рекордс.
+Таким образом работа со стейтом - очень быстрая.
+
+11. Почему не TypeScript ? Я думаю - иммутаельность !
+Чанг Лу -  потому, что производительность (execution), package managment, build system, комьюнити, ...
+https://www.youtube.com/watch?time_continue=13&v=ADMeIhjaKnQ на 26-ой минуте
+Успех Реакта  - это скорость его работы. Джордан сделал 10 итераций Реакта,
+и только потом сказал,  что Реакт готов к опен сурсу
+
++   https://medium.com/reasonconf/reasonml-conference-2018-8283b1e4c437
+
+11.1  Если это первый ваш FP язык, то будут проблемы с терминологией с
+
+11.2  Jeason -  The crappy js-to-reason converter anyone can contribute to!
+https://github.com/chenglou/jeason
+
+11.3 https://www.youtube.com/watch?v=4xr0WE49eik   8 минуа
+ Неожиданные (странные) вещи в реазон
+    - JS.log() ,
+     - LIst    let a = [1,2,3,4,5,6,7,8];
+var a = [ 1, [ 2, [ 3, [ 4, [ 5, [ 6, [ 7, [ 8, 0 ] ] ] ] ] ] ] ];
+--------------------------------------
+let a = [1, 2, 3]; /* ok */
+let b = [0, ...a]; /* ok */
+let c = [...a, 4]; /* syntax error */
+let d = [10,11,12, ...a]; /* ok */
+
+11.4  НАшел (не нашел, ошибся) в проекте PPRB страховки место, где в редьюсере модифицируют payload
+src/components/common/Documents/reducer.jsx c. 34-37
+изменил - а тесты проходят без проблем
+обязательно нужна immutability !
+
+12.
+“Most people make the mistake of thinking design is what it looks like.
+People think it’s this veneer – that the designers are handed this box and told,
+‘Make it look good!’
+That’s not what we think design is.
+It’s not just what it looks like and feels like.
+Design is how it works.” – Steve Jobs
+
+This quote is from the 2003 New York Times article “The Guts of a New Machine.”
+
+
+13. Когда работаеш с рекордами - компилятор плодит много доп переменных
+type person = {
+  age: string,
+  name: string,
+  birthDate: string,
+};
+let me = {
+  age: "5" ++ " " ++ string_of_int(Random.int(100)),
+  name: "Big Reason" ++ " " ++ string_of_int(Random.int(100)),
+  birthDate: "11.03.1980" ++ " " ++ string_of_int(Random.int(100)),
+};
+let notMe = {...me, name: "VVtu XA " ++ string_of_int(Random.int(10))};
+Js.log(notMe);
+-----------------
+var me_000 = /* age */"5 " + String(Random.$$int(100));
+var me_001 = /* name */"Big Reason " + String(Random.$$int(100));
+var me_002 = /* birthDate */"11.03.1980 " + String(Random.$$int(100));
+var me = /* record */[
+  me_000,
+  me_001,
+  me_002
+];
+
+Чтобы можно было легко создавать новые рекорды из  старых
+
+var notMe_000 = me_000;
+var notMe_001 = /* name */"VVtu XA " + String(Random.$$int(10));
+var notMe_002 = me_002;
+var notMe = /* record */[
+  notMe_000,
+  notMe_001,
+  notMe_002
+];
+
+13. Отличный каринг на примере перетасовки любых сущностей
+ let reshuffle = dic =>
+    dic
+    |> List.map(item => (item, Random.int(10000000)))
+    |> List.sort(((_, i), (_, j)) => i - j)
+    |> List.map(((item, _)) => item);
+
+		но нужны лишние скобки в последнем List.map
+
+- !!! ошибка с недостающими скобками в треьей заключительной строке.
+вот что значит "срестили ужа с ежом"
+ (x,_) => x - означает функцию от двух переменных,
+ а нам нужно было функцию с деструкцией тапла в аргументе
+ в итоге правильно ((x,_)) => x  - это функция от одного аргумента.
+Но все это сразу становится видным из за отличного фантастического контроля типов.
+
+  Random.self_init();  -- самоинициализация генератора случайх чисел
+
+
+
+14. В общем - гораздо меньше хлама.
+
+15. Первым делом подключил css и сделал инклюды
+[%bs.raw {|require('./App.css')|}];  -- css взял из своего старого проекта без изменений
+css классы не проверяются на существование. Если какой-то класс отсуствует,
+то в reasonml не будет никаких предупреждений и сообщений. (Это плохо)
+
+
+include Reshuffle;
+include Dictionaries;   --  Вместе инклюдами подтянул типы данных
+
+никаких инклюдов не надо - все импортируется под капотом по имени файла
+файл становиться модулем
+имя файла, всегда должно быть с большой буквы
+
+
+
+16. Вторым делом написал тип state
+type state = {
+  activeIndex: int,
+  showEnglish: bool,
+  showSettings: bool,
+  appcodeIsSpeaking: bool,
+  randomDictionary: Dictionaries.pairList,
+};
+
+тоже очень удобно для исключения дальнейших ошибок
+
+17. Дальше написал
+	initialState: () => {
+    activeIndex: 0,
+    showEnglish: false,
+    showSettings: false,
+    appcodeIsSpeaking: false,
+    randomDictionary: Reshuffle.reshuffle(Dictionaries.dictionary1),
+  },
+
+18. Пропсы - как именованные аргументы
+	let make = (~message) => { }
+
+	In OCaml/Reason, you can attach labels to an argument:
+		let addCoordinates = (~x, ~y) => {
+  		/* use x and y here */
+		};
+------
+
+19. Решение задачи с яндекс собеседования бека
+Найти за один проход по односвязанному списку 3 элемент с конца списка.
+-- хвостовая рекурсия
+let rec get3rec = (a, zapas, n) =>
+  switch (a) {
+  | [] =>
+    if (n === 0) {
+      switch (zapas) {
+      | [] => (-1)
+      | [o, ..._] => o
+      };
+    } else {
+      (-1);
+    }
+  | [_, ...y] =>
+    if (n === 0) {
+      switch (zapas) {
+      | [] => (-1)
+      | [_, ...rest] => get3rec(y, rest, 0)
+      };
+    } else {
+      get3rec(y, zapas, n - 1);
+    }
+  };
+
+let get3 = a => get3rec(a, a, 3);
+
+let otvet = get3([0,0,1,2,3,4,5,6,7,8]);
+
+Js.log(otvet);
+
+-----
+решение задачи о третьем элементе через левую и правую свертки
+let otvet = [1, 2, 3, 4, 5, 6];
+
+let rev = xxx => List.fold_left((a, x) => [x, ...a], [], xxx);
+/*let fold_right: (('a, 'b) => 'b, list('a), 'b) => 'b; */
+
+let get3_right_000 = xxx =>
+  List.fold_right(
+    ( x, (res, n)) =>
+      if (n === 1) {
+        (x, n - 1);
+      } else {
+        (res, n - 1);
+      },
+    xxx,
+    ((-1), 3),
+  );
+let get3_right = xxx => {
+  let (res0,_) = get3_right_000(xxx);
+  res0;
+};
+Js.log(get3_right(otvet));
+
+let get3_left_000 = xxx =>
+  List.fold_left(
+    ( (res, n), x ) =>
+      if (n === 0) {
+        let [_, ...newRes] = res;
+        (newRes, 0);
+      } else {
+        (res, n - 1);
+      },
+        (xxx, 3),
+    xxx,
+  );
+let get3_left = xxx => {
+  let (res0,_) = get3_left_000(xxx);
+  let [res00,..._] = res0;
+  res00;
+};
+Js.log(get3_left(otvet));
+
+-------
+
+
+20.    Изменение порядока аргументов при переходе от left к right  не очевиден
+         List.fold_left( func(akkum, value) => akkum, akkum , list)
+         List.fold_right( func(value, akkum) => akkum,  list, akkum)
+
+- у хаскеля при переходе от foldl к foldr меняется только порядок аргументов в функции func
+foldl :: (b -> a -> b) -> b -> [a] -> b
+foldr :: (a -> b -> b) -> b -> [a] -> b
+
+
+21. Unit  type - like void, nil, null in other languages.
+// ------------------------------------------------
+ReasonML unit — what does unit mean?
+In a strongly typed language you need to define what a function returns every time,
+but sometimes a function does not return something.
+This is what unit is used for, unit is used to defining when a function does not return anything.
+let log = () => {
+  print_endline("hello");
+  print_endline("world")
+};
+log();
+Functions always need argument
+and with reason when you call the function “()” evaluates to “unit” and
+since the last line in a function is automatically returned the function has also a return type of unit,
+because print_endline returns “unit”.
+So unit can be a bit confusing at the start coming from JavaScript
+which is a weakly typed language,
+but once you begin to use it more and understand the basic principals
+like there always needs type even when nothing is given.
+
+// ------------------------------------------------
+Type option('a) for optional values
+
+In many object-oriented languages, a variable having type string means
+that the variable can be either null or a string value.
+Types that include null are called nullable.
+Nullable types are problematic in that it’s easy to work with their values
+while forgetting to handle null.
+If – unexpectedly – a null appears, you get the infamous null pointer exceptions.
+
+In ReasonML, types are never nullable.
+Instead, potentially missing values are handled via the following parameterized variant:
+
+type option('a) =
+  | None
+  | Some('a);
+option forces you to always consider the None case.
+
+ReasonML’s support for option is minimal.
+ The definition of this variant is part of the language,
+  but the core standard library has no utility functions
+  for working with optional values, yet.
+  Until they are, you can use BuckleScript’s Js.Option.
+
+// ------------------------------------------------
+Type result('a) for error handling
+result is another standard variant for error-handling in OCaml:
+type result('good, 'bad) =
+  | Ok('good)
+  | Error('bad);
+Until ReasonML’s core library supports it, you can use BuckleScript’s Js.Result.
+
+// ------------------------------------------------
+// epic type - не нашел информацию об этом типе !!!!
+
+
+Полная гарантия покрытия типами в отличии от flow + быстрый код после компиляции
+Джаваскрипт не полностью функциональный язык, purescript - да
+
+
+20.2  Be careful not to confuse a constructor carrying 2 arguments with a constructor
+ carrying a single tuple argument:
+
+type account =
+  | Facebook(string, int) /* 2 arguments */;
+type account2 =
+  | Instagram((string, int)) /* 1 argument - happens to be a 2-tuple */;
+Variants Must Have constructors
+
+If you come from an untyped language, you might be tempted to try type foo = int | string.
+This isn't possible in Reason;
+you'd have to give each branch a constructor: type foo = Int(int) | String(string).
+Though usually, needing this might be an anti-pattern.
+The Design Decisions section below explains more.
+
+
+
+
+21.1 Refmt  like
+
+refmt ("Reason format") is the binary that powers our editors' auto-formatting feature.
+ It takes in your code and spits it out, nicely formatted.
+ It also serves to convert to/from Reason/OCaml syntax.
+ The Reason community uses it to achieve a consistent code style throughout different projects,
+and to avoid time-consuming manual formatting & stylistic debates.
+
+It responsively formats the code based on the editor width.
+In other words, it doesn't just naively break to the next line at a certain characters limit;
+it solves the layout constraints and arranges your code accordingly.
+
+21.2 Синтаксис ReasonMl убрал такие проблемные места Ocaml как двойные семиколоны
+
+
+22.  История ReasonML Backlesript  и их взаимотношения.
+https://www.imaginarycloud.com/blog/reasonml-react-as-first-intended/
+Если бы ReasonML появился раньше  - реадкс бы не понадобился.
+This made Facebook believe that it could be feasible and convenient
+to move React itself closer to its roots. Eventuay,
+they wouldn't have done so if they didn't have so much of the work already done...
+
+Сравнительная таблица ReasonML и Elm
+
+
+23. Everything is camel-cased in ReasonML
+
+ReasonML is based on OCaml,
+which uses snake-casing for lowercase names (create_resource)
+and camel-casing for uppercase names (StringUtilities).
+That’s why you’ll occasionally see snake-cased names.
+But all new ReasonML code is camel-cased (StringUtilities, createResource).
+
+Special prefixes and suffixes for variable names
+
+A prefixed underscore means: don’t warn me about this variable not being used.
+
+let f = (x, _y) => x;
+  /* No warning about _y */
+Suffixed apostrophes are legal (in math, x' means a modified version of x):
+
+let x = 23;
+let x' = x + 1;
+Prefixed apostrophes are reserved for type variables (think generic types in C-style languages):
+
+let len = (arr: array('a)) => Array.length(arr);
+
+25.  https://wiki.haskell.org/The_JavaScript_Problem
+
+26. Сделал обертки вокруг reactjs компонентов:
+
+// ---------------------------------------------------------
+файл ArrowIconWrapper.re:
+
+[@bs.module "./ArrowIcon.jsx"]
+external arrowIcon : React.reactClass = "default";
+
+let make = (~color: string, ~height: string, children) =>
+  React.wrapJsForReason(
+    ~reactClass=arrowIcon,
+    ~props={"fill": color, "height": height, "width": height},
+    children,
+  );
+
+и вызывать его надо как  <ArrowIconWrapper color="red" height="32" />
+// ---------------------------------------------------------
+
+ 27.  Папки и подпапки проекта -
+    пришлось исправить bsconfig.json
+  	"sources": [ "src", "src/svg" ],
+    перечислены подпапки, где лежат sources
+    никаких инклюдов - очень хорошо. если проект скомпилился,
+    то он нашел все модули и сверил типы пропсов
+
+
+28. Сообщения об ошибках не очень информативны
+
+  This function has type
+    (~color: string, ~height: string) =>
+    React.componentSpec(React.stateless, React.stateless,
+                               React.noRetainedProps,
+                               React.noRetainedProps,
+                               React.actionless)
+  It only accepts 2 arguments; here, it's called with more.
+    at Array.map (<anonymous>)
+    at <anonymous>
+
+    добавил как аргумент   _children  - и ошибка ушла
+
+29. Chenglou -> Yes, the first prototype of React was written in SML; we then moved onto OCaml.
+
+Chenglou  - twitter
+Cheng Lou
+@_chenglou
+
+Swift: Apple's OCaml
+Reason: Facebook's OCaml
+F#: Microsoft's OCaml
+
+Rust: - Can't believe I forgot to include Rust... thanks
+
+(Rust and swift - не очень близки к Ocaml)
+Первый компилятор языка Rust был написан на Ocaml.  Сейчас - Rust на Ruste.
+
+
+29. По докладу https://ruvid.net/video/reasonreact-functional-programming-for-javascript-developers-lfA8qy0V34Y.html
+
+29.1. 2016 - год   Bloomberg L.P. — один из двух ведущих поставщиков финансовой информации
+ для профессиональных участников финансовых рынков - создал (и сделал open source)
+ BuckleScript - компилятор Ocaml -> Js   (Пряжка, скоба, застежка)
+
+ BuckleScript: A JavaScript backend for OCaml focused on smooth integration and clean generated code.
+
+29.2. Будете ли более продуктивны и быстры, при использовании ReasonReact вместо ReactJS ?
+
+29.3. При использовании ReactJS вы обычно используете
+  NPM, ReactRouter, Immutable.js, Prettier, Eslint, Flow, Redux, ReduxActions
+Если использовать reasonreact - Нужно  NPM
+Остальное   (ReactRouter, Immutable.js, Prettier, Eslint, Flow, Redux + ReduxActions) - уже есть в ReasonReact
+Кстати , сильно ументшится количество папок и файлов
+  - файлы reducer, actions, selectors, constants - контейнер и сам компонент.
+  см про папки п. 27
+
+
+29.4. LifeCycle hooks - практически совпадают
+   (за исключением componentWillUnmount - нужно испльзовать componentDidUnmount)
+
+   https://github.com/reasonml/reason-react/blob/master/docs/lifecycles.md
+
+  Много ньюансов.
+
+  Для всех иконок в моем приложени пришлось сделать
+      shouldUpdate: _ => false,
+      чтобы они не перерендеривались каждый раз.
+
+
+29.5. Есть statelessComponent и
+      (statefullСomponent - заменент на reducerComponent) - в нем вы должны определить
+            type action =
+              | GoPrevious
+              | GoNext
+              | ShowEnglish
+              | HideEnglish;
+
+    есть еще  statelessComponentWithRetainedProps  для доступа к  (prevProps и nextProps)
+
+    Access next or previous props: retainedProps
+
+One pattern that's sometimes used in ReactJS is accessing a lifecyle event's prevProps
+(componentDidUpdate), nextProps (componentWillUpdate), and so on.
+ReasonReact doesn't automatically keep copies of previous props for you.
+We provide the retainedProps API for this purpose: https://github.com/reasonml/reason-react/blob/master/docs/lifecycles.md#access-next-or-previous-props-retainedprops
+
+
+30. ReasonReact - не использует и не нуждается в Джаваскипт классах.
+component - это просто рекорд, чьи поля вы можете перезаписать (с помощью функции make).
+рекорд компилируется в джаваскрит массив - поэтому component - это JS array
+
+31. Пока - плохая поддержка Unicode. Пришлось использовать
+let dictionary1: pairList = [
+  rus: {js|Юникод. Плохая поддержка.|js},
+
+  ReasonML strings are encoded as UTF-8 and not compatible with JavaScript’s UTF-16 strings.
+  ReasonML’s support for Unicode is also worse than JavaScript’s – already limited – one.
+  As a short-term workaround, you can use BuckleScript’s JavaScript strings in ReasonML:
+
+  let a ="Hello";
+  Js.log(a);
+  let aa = "Привет";
+  Js.log(aa);
+  let aaa = {js|Привет|js};
+  Js.log(aaa);
+
+  These strings are produced via multi-line string literals annotated with js,
+  which are only treated specially by BuckleScript.
+  In native ReasonML, you get normal strings.
+
+32.   Object
+JavaScript objects are used for two major purposes:
+
+As a hash map (or "dictionary"), where keys can be dynamically added/removed
+and where values are of the same type.
+As a record, where fields are fixed (though still maybe sometimes optional)
+and where values can be of different types.
+Correspondingly, BuckleScript works with JS objects in these 2 ways.
+
+33. Export
+BuckleScript allows compiling to:
+CommonJS (require('myFile'))
+ES6 modules (import * from 'myFile')
+AMD (define(['myFile'], ...))
+The output format is configurable in bsb, described in a later section.
+
+By default, every let binding is exported.
+If their values are safe to use on the JS side,
+you can directly require the generated JS file and use them (see the JS file itself!).
+
+To only export a few selected lets,
+simply add an interface file that hides some of the let bindings.
+
+
+34. JSON
+There are several ways to work with JSON right now, that we'll unify and polish very soon.
+
+35. Composition operators
+
+Pipelining - Great for building pipelines of data processing:
+
+   1.   f(g(x)) ===  x -> g -> f     -- Fast pipe (нигде особо не описан) похоже это из за js
+      ( |. устарел - теперь   -> )
+   2.   f(g(x)) ===  x |> g |> f     -- Reverse-application operator
+
+   3.   f(g(x)) ===  f @@ g @@ x     -- Application operator
+
+   Между 1 и 2 есть разница !!! если есть еще агрументы у функций
+      a -> foo(b) -> bar === bar(foo(a, b))
+      a |> foo(b) |> bar === bar(foo(b, a))
+
+-> отличается от  |>
+
+Random.init(100);
+
+let a = "a = " ++ string_of_int(Random.int(10)) ++ ";";
+let b = "b = " ++ string_of_int(Random.int(10) + 100) ++ ";";
+
+let con = (x, y) => x ++ y;
+
+let p1 = con(a, b);
+
+let p2 = b |> con(a);
+
+let p3 = b->con(a);
+
+Js.log(p1);
+Js.log(p2);
+Js.log(p3);
+
+и форматируется подругому, синтаксический сахар
+
+
+Операторы - это просто функции.  Их можно переопределить
+
+
+Get Multiple Results
+
+The fast pipe operator can also be used on a tuple:
+
+let (left, middle, right) = myData -> (getLeft, getMiddle, getRight)
+This turns into:
+
+let left = getLeft(myData);
+let middle = getMiddle(myData);
+let right = getRight(myData);
+Convenient for certain kind of operations.
+
+36. action with parameter - ok
+
+37. Feel free to trigger another action in SideEffects and UpdateWithSideEffects -
+  мало примеров
+  -  сделал сам
+
+ reducer: (action, state) =>
+    switch (action) {
+      | ChangeActiveIndex(ince) =>
+          let nI = state.activeIndex + ince;
+          let newIndex =
+            if (nI < 0) {
+              List.length(state.randomDictionary) - 1;
+            } else if (nI >= List.length(state.randomDictionary)) {
+              0;
+            } else {
+              nI;
+            };
+          React.UpdateWithSideEffects(
+            {
+              ...state,
+              activeIndex: newIndex,
+              appcodeIsSpeaking: false,
+              showEnglish: false,
+            },
+            (self => self.send(SwitchEnglishShowing)),    /*  но делает два рендера */
+          );
+      |  ....
+    },
+
+37.2 !!!  -   С помощью  React.SideEffects можно выполнить два или более актионов за один рендер:
+   React.SideEffects(
+        (
+          self => {
+            self.send(ChangeActiveIndex(1));
+            self.send(ChangeActiveIndex(1));
+          }
+        ),
+      ) !!!
+
+Important Notes
+
+Please read through all these points, if you want to fully take advantage of reducer and avoid future ReactJS Fiber race condition problems.
+
+The action type's variants can carry a payload: onClick={data => self.send(Click(data.foo))}.
+Don't pass the whole event into the action variant's payload.
+ReactJS events are pooled; by the time you intercept the action in the reducer, the event's already recycled.
+
+reducer must be pure! Aka don't do side-effects in them directly.
+You'll thank us when we enable the upcoming concurrent React (Fiber).
+Use SideEffects or UpdateWithSideEffects to enqueue a side-effect.
+
+The side-effect (the callback) will be executed after the state setting,
+but before the next render.
+If you need to do e.g. ReactEventRe.BlablaEvent.preventDefault(event),
+do it in self.send, before returning the action type. Again, reducer must be pure.
+
+Feel free to trigger another action in SideEffects and UpdateWithSideEffects,
+e.g. UpdateWithSideEffects(newState, (self) => self.send(Click)).
+
+If your state only holds instance variables,
+it also means (by the convention in the instance variables section)
+that your component only contains self.handle, no self.send.
+You still needs to specify a reducer like so:
+reducer: ((), _state) => React.NoUpdate.
+Otherwise you'll get a variable cannot be generalized type error.
+Tip
+
+Cram as much as possible into reducer.
+Keep your actual callback handlers (the self.send(Foo) part) dumb and small.
+This makes all your state updates & side-effects
+(which itself should mostly only be inside React.SideEffects and React.UpdateWithSideEffects)
+ much easier to scan through.
+Also more ReactJS fiber async-mode resilient.
+
+
+
+38.  Managed to get scrollTop value from ref, but failed to set it.
+It turns out to be immutable !!!
+'magic syntax accessor'  - obj##scrollTop
+
+self =>
+            switch (self.state.russianSectionRef^) {
+            | None => ()
+            | Some(domElement) =>
+              let obj = ReactDOMRe.domElementToObj(domElement);
+              let scrollTop = obj##scrollTop;
+              Js.log("scrollTop = ");
+              Js.log(scrollTop);
+            }
+        ),
+
+  39. reset scrolling without ref - only by applying key prop  (key=activeObj.eng)
+
+
+40. работа с window
+    middleware - для редьюсера
+    css modules
+    generators  - redux saga
+    devtools - like redux devtools
+    debuging
+    testing - jest
+
+40.1  Модуль   (Module) - мощное средство в ReasonMl
+  - Каждый файл  .re - это тоже модуль (автоматически)
+      The file React.re implicitly forms a module React,
+      which can be seen by other source files
+  - Модули могут быть вложенными (nested)
+  - Имя модуля должно начинаться с большой буквы.
+
+  - Constantly referring to a value/type in a module can be tedious. We can open a module's definition and refer to its contents without prepending them with the module's name. Two ways:
+
+      1. Local open.
+            let item = Dom.Storage.(localStorage |> getItem(activeObj.rus) );
+                что означает:
+            let item = Dom.Storage.localStorage |> Dom.Storage.getItem(activeObj.rus));
+
+
+      2. Global open
+
+          let item = {
+            open Dom.Storage;
+            localStorage |> getItem(activeObj.rus);
+          }
+                что означает:
+          let item = Dom.Storage.localStorage |> Dom.Storage.getItem(activeObj.rus));
+
+
+          open School;
+          let anotherPerson: profession = Teacher;
+          printProfession(anotherPerson);
+
+   - Module functor      заменитель type classes
+   ( такая функция, которая берет модуль,
+      навешивает на него некоторую функциональность,
+      и возвращает другой модуль)
+
+      module StringMap =
+        Map.Make(
+          {
+            type t = string;
+            let compare = compare;
+          },
+        );
+
+41.  Ocaml for Haskellers
+http://science.raphael.poss.name/haskell-for-ocaml-programmers.html
+
+Module system.
+OCaml does not have type classes but it does have modules
+and you can achieve fairly similar effects with them.
+(Another classic way of getting type class style effects is to use objects,
+but I’m not covering them today.)
+
+----
+http://science.raphael.poss.name/haskell-for-ocaml-programmers.html#type-classes-in-a-nutshell
+
+Type classes in a nutshell
+
+A common task in software engineering is to advertise a set of services using an abstract interface that hides the internal implementation. For this purpose, OCaml programmers can use objects or parametric modules.
+
+Since Haskell provides neither objects nor parametric modules, Haskell programmers rely on another mechanism entirely, called “type classes”. Type classes are nothing like modules but they can help for encapsulation given the right mindset.
+
+In a nutshell, Haskell type classes express a programming contract over a set of types (hence the name): that all types in the class, ie. its “instances”, are guaranteed to provide some other related functions. Moreover, a class can also provide a default implementation for some of its functions.
+
+The usual example is the Eq class, written as follows:
+
+class Eq a where
+    (==) :: a -> a -> Bool
+    (/=) :: a -> a -> Bool
+    (/=) x y = not (x == y)
+This definition expresses the following:
+“for all types a in the class Eq a, there exist two operators (==) and (/=)
+that accept two arguments of type a and returns a boolean value.
+Moreover, the class Eq provides a default implementation of (/=)
+that uses the actual implementation of (==) by each particular instance.”
+
+Once a class is specified, a programmer can do two things with it:
+define type instances of the class,
+or define functions over instances of the class.
+
+To define an instance of a class, you first define a type,
+ then you define how the type belongs to the class.
+  For example, one can first define a new type that implements Peano integers:
+
+data Peano = Zero | Succ Peano
+
+Then, express that Peano is a member of Eq:
+
+instance Eq Peano where
+    (==) Zero Zero = True
+    (==) (Succ x) (Succ x) = (x == x)
+    (==) _ _ = False
+Once this definition is visible,
+automatically any expression of the form “x /= y” becomes valid,
+thanks to the default implementation of (/=) already provided by Eq.
+
+- Заменитель type classes  это
+
+41. window setTimeout ...
+https://bucklescript.github.io/docs/en/bind-to-global-values.html
+
+Now, here's how you bind to a JS value:
+
+[@bs.val] external setTimeout : (unit => unit, int) => float = "setTimeout";
+[@bs.val] external clearTimeout : float => unit = "clearTimeout";
+
+exapmle ====>
+  didMount: _self => {
+    let _ = setTimeout(() => Js.log("didMount 3000"), 3000); /* it works */
+    ();
+  },
+
+  можно еще проще - без всяких обявлений
+  didMount: _self => {
+    let _ = Js.Global.setTimeout(() => Js.log("didMount 3000"), 3000);
+    ();
+  },
+
+-------
+
+42.    Руководство - Поскольку CSS-in-JS сейсас моде, мы скоро выкатим наше официальное решение.
+Пока стилями можно пользоваться так.
+
+<div style=(ReactDOMRe.Style.make(~color="#444444", ~fontSize="68px", ()))/>
+
+      Так работать со стилями.
+
+43. Понадобилось сделать requestAnimationFrame - сделал
+[@bs.val] external requestAnimationFrame : (unit => unit) => float = "requestAnimationFrame";
+
+45. finish Animation of PopUpSettingsMenu - commit
+
+
+46. debuging
+chenglou commented on Sep 14, 2017
+I can promise that the quality of vscode-reasonml is solid! We use it daily for both OCaml and Reason syntax. I've submitted a PR to redirect folks to vscode-reasonml. It's a deprecation notice; if that's too much then I can change the wording to something else.
+
+Thanks for the consideration =)
+
+
+47. Обработка исключений. Exception.
+Исключения не укладываются в строгую правильную типизацию. Они нарушают её.
+Также страдает preformance!
+
+Исключения есть в языке ReasonMl. Пример:
+
+Exceptions are just a special kind of variant,
+"thrown" in exceptional cases (don't abuse them!). - не злоупотребляйте ими !
+
+let getItem = (index, theArr) =>
+  if (index < Array.length(theArr) && index >= 0) {
+    theArr[index]
+  } else {
+    raise(Not_found)
+  };
+let result =
+  try (getItem(5,[|1, 2, 3|])) {
+  | Not_found => -1000 /* Default value if getItem throws */
+  };
+Js.log(result);
+но стайлгайд (как и Гугловский стайлгайд) прямо рекомендует не использовать их.
+
+Newer standard library alternatives usually come with option-returning functions
+ rather than exception-throwing ones.
+ For example, List.find has the option-returning counterpart List.find_opt,
+which doesn't throw.
+
+Вариант без исключений с использованием optional
+
+let getItem = (index, theArr) =>
+  if (index < Array.length(theArr) && index >= 0) {
+    Some(theArr[index])
+  } else {
+    None
+  };
+let result = switch (getItem(2,[|1, 2, 3|]) ) {
+  | Some(res)=>res;
+  | None => -1000;
+};
+
+// В общем рекомендуется использовать optional, а не бросать исключение
+
+Хотя исключения еще широко испльуются в Ocaml - это дань традиции.
+
+Код для проверки того, что происходит при обращении к несуществующему элементу массива
+
+let a = [|1,2,3,4,5,6|];
+let index = Random.int(10);
+Js.log(index);
+let b = a[index];
+Js.log(b);
+
+Видно, что брасается исключение!!!
+
+48.  Functor Map.Make
+
+module StringMap =
+  Map.Make(
+    {
+      type t = string;
+      let compare = compare;
+    },
+  );
+
+/* use value of string type */
+let myMap0 = StringMap.empty;
+let myMap00 = StringMap.add("k2", "vvvv", myMap0);
+Js.log(myMap00);
+
+/* use value of int type */
+let myMap1 = StringMap.empty;
+let myMap2 = StringMap.add("k2", 100, myMap1);
+let myMap3 = StringMap.add("k003", 100, myMap2);
+let myMap4 = StringMap.add("k4", 100, myMap3);
+let myMap5 = StringMap.add("k0005", 100, myMap4);
+let myMap6 = StringMap.add("k6", 100, myMap5);
+Js.log(myMap1);
+Js.log(myMap2);
+Js.log(myMap3);
+Js.log(myMap4);
+Js.log(myMap5);
+Js.log(myMap6);
+
+Js.log(StringMap.mem("k0005", myMap6)); /* has it */
+
+Js.log(StringMap.equal( (_,_) => true, myMap6, myMap6));  /* strange equals */
+Js.log( myMap6 == myMap6); /* do not know if it runs throughout the trees */
+
+Js.log(StringMap.map(v => v + 1000, myMap6));
+Js.log(StringMap.mapi((key, v) => string_of_int(v) ++ " " ++ key, myMap6));
+
+let result =
+  try (StringMap.find("k6", myMap6)) {
+  | Not_found => (-1000)
+  };
+Js.log(result);
+
+/* New type scrore2 for string values (not for int values as before) */
+type scores2 = StringMap.t(string);
+let myMap0:scores2 = StringMap.empty;
+let myMap000 = StringMap.add("k2", "v100", myMap0);
+Js.log(myMap000);
+
+
+
+49.  Similarly, to pre-process a value before sending it back to the component's owner:
+
+
+
+50. Нарвался на ошибку
+
+  Pitfall
+
+  Following the above section's reasoning, this code should work:
+
+  let children = [| <div /> |];
+  <div> ...children </div>; /* <--- this line */
+  It does work for custom components (upper-case), But it doesn't for DOM components (lower-cased).
+  This is due to some bindings-related constraints;
+   we'll make this better in the future!
+   In the meantime, for passing to DOM element, e.g.
+    <div className=bar> ...children </div> use the following:
+
+  React.createDomElement("div", ~props={"className": bar}, children);
+
+  https://stackoverflow.com/questions/51501359/handling-children-in-reasonml
+
+  https://reasonml.github.io/reason-react/docs/en/jsx#children
+
+
+51. Component as Prop
+
+In ReactJS, <Menu banner=MyBanner /> is easy;
+in ReasonReact, we can't trivially pass the whole component module
+(it wouldn't even be syntactically valid.
+A module resides in another layer of language. Explanations).
+Solution:
+
+let bannerCallback = (prop1, prop2) => <MyBanner message=prop1 count=prop2 />;
+
+<Menu bannerFunc=bannerCallback />;
+This also has some added advantages:
+
+The owner is the one controlling how the component renders,
+not some opaque logic inside MyBanner.
+Circumvents the tendency of needing a props spread in MyBanner's render,
+since passing a component to a child
+and the child using prop spread on said component usually go together.
+
+
+52. Очень удобно с пропсами - если пропустил пропс, то компилятор не даст скомпилировать код
+
+
+53.
+
+4
+down vote
+Similar but more detailed answer from Herbert Schildt C++ book:-
+
+Early binding refers to events that occur at compile time.
+In essence, early binding occurs when all information needed to call
+a function is known at compile time.
+ (Put differently, early binding means that an object and a function call are bound during compilation.)
+ Examples of early binding include normal function calls (including standard library functions),
+ overloaded function calls, and overloaded operators.
+ The main advantage to early binding is efficiency.
+ Because all information necessary to call a function is determined at compile time,
+ these types of function calls are very fast.
+
+The opposite of early binding is late binding.
+ Late binding refers to function calls that are not resolved until run time.
+  Virtual functions are used to achieve late binding.
+  As you know, when access is via a base pointer or reference,
+  the virtual function actually called is determined by the type of object pointed to by the pointer.
+   Because in most cases this cannot be determined at compile time,
+   the object and the function are not linked until run time.
+   The main advantage to late binding is flexibility.
+    Unlike early binding, late binding allows you to create programs
+    that can respond to events occurring while the program executes
+     without having to create a large amount of "contingency code."
+     Keep in mind that because a function call is not resolved until run time,
+     late binding can make for somewhat slower execution times.
+     However today, fast computers have significantly reduced the execution times related to late binding.
+
+
+
+
+     https://medium.com/reasonconf/reasonml-conference-2018-8283b1e4c437 Translating JS Idioms  !!!
+     !!!
+
+
+Instructions on Getting Started with Windows #195
+https://github.com/reasonml/reasonml.github.io/issues/195
+OCaml and Reason IDE - for WSL
+
+
+
+// ----------------------------------------
+
+Brendan Eich - создатель js  (месть геев)
+
+
+
+He said JavaScript could never target WASM  because it's weakly typed but that's not really true.
+There won't be a JS to WASM compiler simply because it'd be slower than just plain old JS due to the extra layer of abstraction.
+
+opitonal channing operator in js:   var y = foo ?. bar ?. y;
+
+JS is a languge to comunicatre with each other      lingua franca
+
+Ли́нгва фра́нка (итал. lingua franca — «франкский язык») — язык или диалект,
+ систематически используемый для коммуникации между людьми,
+ родными языками которых являются другие языки.
+
+-------------------------------------
+
+Design Decisions
+After reading the constraints in the previous sections, and if you're coming from a dynamic language background, you might be wondering why one would bother with record in the first place instead of straight using object, since the former needs explicit typing and doesn't allow different records with the same field name to be passed to the same function, etc.
+
+The truth is that most of the times in your app, your data's shape is actually fixed, and if it's not, it can potentially be better represented as a combination of variant (introduced next) + record instead*.
+Record, since its fields are fixed, is compiled to an array with array index accesses instead of JS object (try it in the playground!). On native, it compiles to basically a region of memory where a field access is just one field lookup + one actual access, aka 2 assembly instructions. The good old days where folks measured in nanoseconds...
+Finally, since a record type is resolved through finding that single explicit type declaration (we call this "nominal typing"), the type error messages end up better than the counterpart ("structural typing", like for tuples). This makes refactoring easier; changing a record type's fields naturally allows the compiler to know that it's still the same record, just misused in some places. Otherwise, under structural typing, it might get hard to tell whether the definition site or the usage site is wrong.
+* And we're not just finding excuses for ourselves! Reason objects do support these features.
+
+
+
+------------
+ Размеры бандлов
+
+На большом   (+25 kB)   ( 1050 строк файла dictionaties)
+RE 297
+JS 272
+
+на малом (+23 kB) ( 0 строк файла dictionaties)
+RE 169
+JS 146
+
+ Итого:  +24 kB кода для Reason в среднем
+----------
+Backlescript
+Поменялось представление optional. Теперь, None === undefined , Some("Hello") = "Hello"
+
+-----------------
+
+So, if Facebook intended to make the React ecosystem statically typed,
+Bucklescript was certainly a nice candidate,
+since they seemed to believe that JavaScript -
+with its popular curly braced syntax -
+was largely responsible for React's success.
+
+In order to keep the JavaScript syntax they created an additional parser,
+ handling a new language called ReasonML,
+ that is simply OCaml with a javascript-like curly-braced syntax.
+
+What's up with Redux?
+
+Redux is a state manager that's very popular amongst React projects. Simply put, it allows organizing the application domain logic as a set of composed reducer functions, which are meant to express how the state of the application should be transformed as external events (such as user interactions).
+
+When using ReasonML, we don't need Redux anymore. ReactReason stateless components already come with the concept of a build in reducer, which is meant to take care of the problems Redux used to address.
